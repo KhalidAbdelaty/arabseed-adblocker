@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArabSeed Shield</title>
+    <link rel="stylesheet" href="styles/popup.css" />
+  </head>
+  <body>
+    <header class="popup-header">
+      <div class="brand">
+        <img class="brand-logo" src="icons/arabseed-shield.svg" alt="" />
+        <span class="brand-copy">
+          <h1>ArabSeed Shield</h1>
+          <small>by Khalid Abdelaty</small>
+        </span>
+      </div>
+      <p id="site-host" class="site-host" title="">--</p>
+    </header>
+
+    <main class="popup-body">
+      <section class="stats" aria-label="Blocked requests stats">
+        <div class="stat">
+          <span class="stat-value" id="stat-site">0</span>
+          <span class="stat-label">This site</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-label">All time</span>
+        </div>
+      </section>
+
+      <section class="toggles" aria-label="Controls">
+        <label class="toggle-row">
+          <span class="toggle-label">
+            <strong>Extension enabled</strong>
+            <small>Master switch for blocking</small>
+          </span>
+          <input type="checkbox" id="toggle-enabled" class="toggle" />
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-label">
+            <strong>Block on this site</strong>
+            <small id="site-toggle-help">Disable to add this site to the allowlist</small>
+          </span>
+          <input type="checkbox" id="toggle-site" class="toggle" />
+        </label>
+
+        <label class="toggle-row">
+          <span class="toggle-label">
+            <strong>Strict mode</strong>
+            <small>Aggressive third-party blocking. May break sites.</small>
+          </span>
+          <input type="checkbox" id="toggle-strict" class="toggle" />
+        </label>
+      </section>
+
+      <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
+    </main>
+
+    <footer class="popup-footer">
+      <button type="button" id="open-options" class="link-button">Control Center</button>
+      <span class="version" id="ext-version"></span>
+    </footer>
+
+    <script src="popup.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,329 @@
+[
+  {
+    "id": 5000,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "adsrvr.org",
+        "adserver.com",
+        "adservinginternational.com",
+        "adsupply.com",
+        "adsymptotic.com",
+        "adtechjp.com",
+        "adblade.com",
+        "adcolony.com",
+        "admeld.com",
+        "admedo.com",
+        "adroll.com",
+        "ads.linkedin.com",
+        "ads.pinterest.com",
+        "ads.reddit.com",
+        "ads.tiktok.com",
+        "ads.twitter.com",
+        "ads.yahoo.com",
+        "analytics.tiktok.com",
+        "analytics.twitter.com",
+        "static.ads-twitter.com",
+        "px.ads.linkedin.com",
+        "snap.licdn.com",
+        "ads.snapchat.com",
+        "tr.snapchat.com",
+        "sc-static.net"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "object"]
+    }
+  },
+  {
+    "id": 5001,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "bluekai.com",
+        "tags.bluekai.com",
+        "krxd.net",
+        "demdex.net",
+        "everesttech.net",
+        "exelator.com",
+        "rlcdn.com",
+        "addthis.com",
+        "agkn.com",
+        "audienceiq.com",
+        "bidswitch.net",
+        "btrll.com",
+        "contextweb.com",
+        "crwdcntrl.net",
+        "dotomi.com",
+        "eyeota.net",
+        "lkqd.com",
+        "mathtag.com",
+        "openx.org",
+        "owneriq.net",
+        "pippio.com",
+        "rlets.com",
+        "semasio.net",
+        "serving-sys.com",
+        "simpli.fi",
+        "smaato.com",
+        "spotxchange.com",
+        "stackadapt.com",
+        "tapad.com",
+        "trafficmanager.net",
+        "tribalfusion.com",
+        "turn.com",
+        "w55c.net",
+        "yieldlab.net",
+        "zedo.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping"]
+    }
+  },
+  {
+    "id": 5002,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "stickyadstv.com",
+        "spotx.tv",
+        "spotxcdn.com",
+        "videologygroup.com",
+        "videohub.tv",
+        "tremorhub.com",
+        "tremormedia.com",
+        "innovid.com",
+        "ssp.innovid.com",
+        "freewheel.tv",
+        "freewheel.com",
+        "fwmrm.net",
+        "ads.youtube.com",
+        "googleadservices.youtube.com"
+      ],
+      "resourceTypes": ["script", "media", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 5003,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "||cdn.cookielaw.org^",
+      "resourceTypes": ["script", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 5004,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "tag.bounceexchange.com",
+        "events.bouncex.net",
+        "api.bouncex.net",
+        "tagserve.bouncex.com",
+        "px.dynamicyield.com",
+        "rcom.dynamicyield.com",
+        "cdn.dynamicyield.com",
+        "static.dynamicyield.com",
+        "monetate.net",
+        "se.monetate.net"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "ping"]
+    }
+  },
+  {
+    "id": 5005,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/track?",
+      "resourceTypes": ["image", "ping", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 5006,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/pixel?",
+      "resourceTypes": ["image", "ping", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 5007,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/collect?",
+      "resourceTypes": ["image", "ping", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 5008,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "normalmotor.com",
+        "adsterra.com",
+        "adsterratools.com",
+        "adsterratech.com",
+        "onclickads.net",
+        "clickadu.com",
+        "clickadu.net",
+        "hilltopads.net",
+        "hilltopads.com",
+        "highcpmgate.com",
+        "highcpmrevenuegate.com",
+        "jcphi.com",
+        "303bus.net",
+        "www.303bus.net",
+        "jsccu.com",
+        "monetag.com",
+        "mctracking.io",
+        "mctracking.com",
+        "go.mctracking.io"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "ping",
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 5009,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "popads.net",
+        "popcash.net",
+        "propellerads.com",
+        "popmyads.com",
+        "adcash.com",
+        "exoclick.com",
+        "exosrv.com",
+        "trafficstars.com",
+        "juicyads.com",
+        "ero-advertising.com",
+        "magsrv.com",
+        "magsrv.net",
+        "rtbpop.com",
+        "onclickperformance.com",
+        "ad-maven.com",
+        "ad-maven.net"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "ping"
+      ]
+    }
+  },
+  {
+    "id": 5010,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/partitial/",
+      "requestDomains": [
+        "normalmotor.com",
+        "adsterra.com",
+        "adsterratools.com",
+        "adsterratech.com",
+        "onclickads.net",
+        "highcpmgate.com",
+        "highcpmrevenuegate.com",
+        "jcphi.com",
+        "monetag.com",
+        "mctracking.io",
+        "mctracking.com"
+      ],
+      "domainType": "thirdParty",
+      "resourceTypes": ["sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 5011,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "&prfrev=",
+      "requestDomains": [
+        "popads.net",
+        "popcash.net",
+        "propellerads.com",
+        "popmyads.com",
+        "adcash.com",
+        "exoclick.com",
+        "exosrv.com",
+        "trafficstars.com",
+        "ad-maven.com",
+        "ad-maven.net"
+      ],
+      "domainType": "thirdParty",
+      "resourceTypes": ["sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 5012,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "?var=",
+      "requestDomains": [
+        "normalmotor.com",
+        "onclickads.net",
+        "clickadu.com",
+        "clickadu.net",
+        "hilltopads.net",
+        "hilltopads.com",
+        "303bus.net",
+        "www.303bus.net",
+        "jsccu.com",
+        "propellerads.com",
+        "rtbpop.com"
+      ],
+      "domainType": "thirdParty",
+      "resourceTypes": ["sub_frame"],
+      "excludedInitiatorDomains": [
+        "asd.ink",
+        "asd.homes",
+        "reviewrate.net",
+        "reviewtech.me",
+        "arabseed.me",
+        "seeeed.xyz",
+        "google.com",
+        "youtube.com",
+        "facebook.com",
+        "twitter.com",
+        "x.com",
+        "instagram.com",
+        "github.com"
+      ]
+    }
+  },
+  {
+    "id": 5013,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "||303bus.net^",
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "ping",
+        "image"
+      ]
+    }
+  }
+]

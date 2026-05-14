@@ -1,0 +1,401 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "doubleclick.net",
+        "googlesyndication.com",
+        "googleadservices.com",
+        "adservice.google.com",
+        "pagead2.googlesyndication.com",
+        "tpc.googlesyndication.com",
+        "partner.googleadservices.com",
+        "adclick.g.doubleclick.net"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "object", "media"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "amazon-adsystem.com",
+        "adsystem.amazon.com",
+        "aax.amazon-adsystem.com",
+        "fls-na.amazon.com",
+        "advertising.amazon.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping"]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "adnxs.com",
+        "rubiconproject.com",
+        "openx.net",
+        "pubmatic.com",
+        "criteo.com",
+        "criteo.net",
+        "casalemedia.com",
+        "advertising.com",
+        "adtech.com",
+        "adtechus.com",
+        "yieldmo.com",
+        "indexww.com",
+        "media.net",
+        "smartadserver.com",
+        "33across.com",
+        "districtm.io",
+        "sonobi.com",
+        "sovrn.com",
+        "adform.net",
+        "lijit.com",
+        "rfihub.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "object"]
+    }
+  },
+  {
+    "id": 4,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "taboola.com",
+        "outbrain.com",
+        "revcontent.com",
+        "mgid.com",
+        "zergnet.com",
+        "content.ad",
+        "engageya.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame"]
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "moatads.com",
+        "moat.com",
+        "scorecardresearch.com",
+        "doubleverify.com",
+        "ias-pixel.com",
+        "adsafeprotected.com",
+        "iasds01.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "ping"]
+    }
+  },
+  {
+    "id": 1000,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "google-analytics.com",
+        "ssl.google-analytics.com",
+        "analytics.google.com",
+        "stats.g.doubleclick.net",
+        "googletagmanager.com",
+        "googletagservices.com",
+        "region1.google-analytics.com",
+        "region1.analytics.google.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "ping"]
+    }
+  },
+  {
+    "id": 1001,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "connect.facebook.net"
+      ],
+      "excludedInitiatorDomains": [
+        "facebook.com",
+        "messenger.com",
+        "instagram.com",
+        "whatsapp.com"
+      ],
+      "resourceTypes": ["script", "image", "ping", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 1002,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "mixpanel.com",
+        "api.mixpanel.com",
+        "cdn.mxpnl.com",
+        "segment.com",
+        "segment.io",
+        "api.segment.io",
+        "cdn.segment.com",
+        "amplitude.com",
+        "api.amplitude.com",
+        "cdn.amplitude.com",
+        "heap.io",
+        "heapanalytics.com",
+        "fullstory.com",
+        "rs.fullstory.com",
+        "logrocket.com",
+        "logrocket.io",
+        "hotjar.com",
+        "static.hotjar.com",
+        "script.hotjar.com",
+        "in.hotjar.com",
+        "vc.hotjar.io",
+        "mouseflow.com",
+        "smartlook.com",
+        "luckyorange.com",
+        "luckyorange.net",
+        "crazyegg.com",
+        "clicktale.net",
+        "inspectlet.com",
+        "quantserve.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "ping", "websocket"]
+    }
+  },
+  {
+    "id": 1003,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "branch.io",
+        "app.link",
+        "branch.app.link",
+        "appsflyer.com",
+        "adjust.com",
+        "adjust.io",
+        "kochava.com",
+        "singular.net",
+        "tenjin.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "ping"]
+    }
+  },
+  {
+    "id": 1004,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "bat.bing.com",
+        "clarity.ms",
+        "scripts.clarity.ms",
+        "c.bing.com",
+        "yandex.ru",
+        "mc.yandex.ru",
+        "yandex.com",
+        "metrica.yandex.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "ping"]
+    }
+  },
+  {
+    "id": 1005,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "newrelic.com",
+        "nr-data.net",
+        "bam.nr-data.net",
+        "js-agent.newrelic.com",
+        "sentry-cdn.com",
+        "ravenjs.com",
+        "browser.sentry-cdn.com",
+        "datadoghq.com",
+        "browser-intake-datadoghq.com",
+        "rum.browser-intake-datadoghq.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "ping"]
+    }
+  },
+  {
+    "id": 1006,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "snowplowanalytics.com",
+        "matomo.org",
+        "stats.wp.com",
+        "pixel.wp.com",
+        "chartbeat.com",
+        "chartbeat.net",
+        "cdn.chartbeat.net",
+        "static.chartbeat.com",
+        "ping.chartbeat.net",
+        "parsely.com",
+        "p.parsely.com",
+        "cdn.parsely.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "ping"]
+    }
+  },
+  {
+    "id": 2000,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "||doubleclick.net^",
+      "resourceTypes": ["script", "sub_frame"]
+    }
+  },
+  {
+    "id": 2001,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/pagead/",
+      "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping"]
+    }
+  },
+  {
+    "id": 2002,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/adservice/",
+      "resourceTypes": ["script", "xmlhttprequest", "sub_frame"]
+    }
+  },
+  {
+    "id": 2003,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/adsbygoogle.js",
+      "resourceTypes": ["script"]
+    }
+  },
+  {
+    "id": 2004,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/gtm.js",
+      "resourceTypes": ["script"]
+    }
+  },
+  {
+    "id": 2005,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/gtag/js",
+      "resourceTypes": ["script"]
+    }
+  },
+  {
+    "id": 2006,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/analytics.js",
+      "resourceTypes": ["script"]
+    }
+  },
+  {
+    "id": 2007,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/fbevents.js",
+      "resourceTypes": ["script"]
+    }
+  },
+  {
+    "id": 2008,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/beacon/",
+      "resourceTypes": ["image", "ping", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 3000,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/ad-iframe",
+      "resourceTypes": ["sub_frame"]
+    }
+  },
+  {
+    "id": 3001,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/ads/iframe",
+      "resourceTypes": ["sub_frame"]
+    }
+  },
+  {
+    "id": 3002,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/iframe_ads",
+      "resourceTypes": ["sub_frame"]
+    }
+  },
+  {
+    "id": 4000,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "popads.net",
+        "popcash.net",
+        "propellerads.com",
+        "popmyads.com",
+        "adcash.com",
+        "exoclick.com",
+        "exosrv.com",
+        "trafficjunky.net",
+        "trafficjunky.com",
+        "trafficstars.com",
+        "juicyads.com",
+        "ero-advertising.com"
+      ],
+      "resourceTypes": ["script", "image", "xmlhttprequest", "sub_frame", "ping", "object"]
+    }
+  },
+  {
+    "id": 4001,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/popunder",
+      "resourceTypes": ["script", "sub_frame", "xmlhttprequest"]
+    }
+  },
+  {
+    "id": 4002,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "urlFilter": "/prebid",
+      "resourceTypes": ["script", "xmlhttprequest"]
+    }
+  }
+]

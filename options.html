@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArabSeed Shield - Options</title>
+    <link rel="stylesheet" href="styles/options.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="hero-card">
+        <img class="hero-logo" src="icons/arabseed-shield.svg" alt="" />
+        <div>
+          <p class="eyebrow">ArabSeed Shield</p>
+          <h1>ArabSeed Shield Control Center</h1>
+          <p class="subtitle">
+            Modern local-only ad blocking and targeted anti-detection hardening by Khalid Abdelaty.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="card">
+        <h2>Status</h2>
+        <ul id="status-list" class="status-list">
+          <li>Loading...</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Global allowlist</h2>
+        <p class="card-help">
+          Sites in this list are fully exempt from all blocking. Add a site here when blocking
+          breaks important functionality.
+        </p>
+        <form id="allowlist-form" class="inline-form" autocomplete="off">
+          <label for="allowlist-input" class="visually-hidden">Add a domain</label>
+          <input
+            type="text"
+            id="allowlist-input"
+            placeholder="example.com"
+            spellcheck="false"
+            inputmode="url"
+          />
+          <button type="submit" class="primary">Add domain</button>
+        </form>
+        <p id="allowlist-error" class="form-error" role="alert"></p>
+        <ul id="allowlist-list" class="entry-list" aria-label="Allowlisted domains"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Custom blocklist</h2>
+        <p class="card-help">
+          Add domains or URL filter patterns to block. Choose <em>Domain</em> for entries like
+          <code>tracker.example.com</code>, or <em>URL filter</em> for advanced patterns like
+          <code>||ads.example.com^</code> or <code>/track?</code>.
+        </p>
+        <form id="customrule-form" class="inline-form" autocomplete="off">
+          <select id="customrule-type" aria-label="Custom rule type">
+            <option value="domain">Domain</option>
+            <option value="urlFilter">URL filter</option>
+          </select>
+          <label for="customrule-input" class="visually-hidden">Custom rule value</label>
+          <input
+            type="text"
+            id="customrule-input"
+            placeholder="tracker.example.com or ||tracker.example.com^"
+            spellcheck="false"
+            inputmode="url"
+          />
+          <button type="submit" class="primary">Add rule</button>
+        </form>
+        <p id="customrule-error" class="form-error" role="alert"></p>
+        <ul id="customrule-list" class="entry-list" aria-label="Custom block rules"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Backup &amp; reset</h2>
+        <p class="card-help">
+          All settings are stored locally. Export to back them up, import to restore on another
+          install, or reset to defaults.
+        </p>
+        <div class="button-row">
+          <button type="button" id="btn-export" class="primary">Export settings (JSON)</button>
+          <label for="import-input" class="primary file-label">Import settings (JSON)</label>
+          <input type="file" id="import-input" accept="application/json,.json" hidden />
+          <button type="button" id="btn-reset" class="danger">Reset to defaults</button>
+        </div>
+        <p id="backup-status" class="form-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="card">
+        <h2>Local statistics</h2>
+        <p class="card-help">
+          Aggregate counts kept on this device only. Nothing is ever sent to a server.
+        </p>
+        <ul id="stats-list" class="status-list">
+          <li>Loading...</li>
+        </ul>
+        <button type="button" id="btn-reset-stats" class="link-button">Reset statistics</button>
+      </section>
+
+      <section class="card">
+        <h2>Deception diagnostics</h2>
+        <p class="card-help">
+          Local-only counters for targeted anti-detection patches and strict-rule collision hints.
+        </p>
+        <ul id="diagnostics-list" class="status-list">
+          <li>Loading...</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>About</h2>
+        <ul class="about-list">
+          <li>Owned and maintained by Khalid Abdelaty. All rights reserved.</li>
+          <li>No telemetry. No remote code. No third-party requests from this extension.</li>
+          <li>Per-site allowlist available from the popup if a site breaks.</li>
+          <li>
+            Blocking uses the official <code>chrome.declarativeNetRequest</code> API. The
+            extension also applies page-local deception only on explicitly targeted hosts.
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="options.js" type="module"></script>
+  </body>
+</html>
