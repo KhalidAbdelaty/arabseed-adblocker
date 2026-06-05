@@ -54,7 +54,25 @@
   ];
   var adRedirectHosts = [
     "interlinecustomroofingllc.com",
-    "static.nresystems.com"
+    "static.nresystems.com",
+    "9instatement.com"
+  ];
+  // New windows/tabs to these hosts are allowed even under strict popup blocking,
+  // so the site's own social/share links keep working.
+  var popupAllowedExternalHosts = [
+    "facebook.com",
+    "fb.com",
+    "m.facebook.com",
+    "twitter.com",
+    "x.com",
+    "t.me",
+    "telegram.org",
+    "instagram.com",
+    "youtube.com",
+    "youtu.be",
+    "wa.me",
+    "whatsapp.com",
+    "linkedin.com"
   ];
 
   var config = {
@@ -63,6 +81,7 @@
     trustedNavigationHosts: targetHosts.concat(downloadDeliveryHosts),
     downloadDeliveryHosts: downloadDeliveryHosts.slice(),
     adRedirectHosts: adRedirectHosts.slice(),
+    popupAllowedExternalHosts: popupAllowedExternalHosts.slice(),
     baitSelectors: [
       "#adex",
       "#advert1",
@@ -130,6 +149,7 @@
       documentDeception: true,
       mutationObserverDeception: true,
       navigationGuard: true,
+      popupGuard: true,
       braveDeception: true,
       integrityWatchdog: true
     }
@@ -167,6 +187,7 @@
     Object.freeze(config.watchSelectors);
     Object.freeze(config.dangerousProtocols);
     Object.freeze(config.adRedirectHosts);
+    Object.freeze(config.popupAllowedExternalHosts);
     Object.freeze(config.overlayAdSelectors);
     Object.freeze(config.detectorSettings);
     Object.freeze(config.killSwitches);

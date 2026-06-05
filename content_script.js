@@ -54,6 +54,8 @@
     "interlinecustomroofingllc.com",
     "static.nresystems.com"
   ];
+  const ASD_POPUP_ALLOWED_EXTERNAL_HOSTS = TARGET_CONFIG.popupAllowedExternalHosts || [];
+  const ASD_KILL_SWITCHES = TARGET_CONFIG.killSwitches || {};
   const ASD_WARNING_TEXT_PHRASES = TARGET_CONFIG.warningTextPhrases || [
     "قم بإستخدام متصفح اخر",
     "قم باستخدام متصفح اخر",
@@ -295,6 +297,22 @@
 
   function isKnownAdRedirectHost(host) {
     return hostMatchesAnySuffix(host, ASD_AD_REDIRECT_HOSTS);
+  }
+
+  function isPopupGuardEnabled() {
+    return ASD_KILL_SWITCHES.popupGuard !== false;
+  }
+
+  function targetOpensNewWindow(target) {
+    const value = String(target || "").toLowerCase();
+    return value === "_blank" || value === "_new";
+  }
+
+  function isTrustedPopupDestination(host) {
+    if (!host) return false;
+    if (isAsdHost(host)) return true;
+    if (isAsdPopupAllowedHost(host)) return true;
+    return hostMatchesAnySuffix(host, ASD_POPUP_ALLOWED_EXTERNAL_HOSTS);
   }
 
   function isLikelyObfuscatedPath(parsedUrl) {
@@ -572,6 +590,22 @@
     } catch (_) {
       return;
     }
+
+    // Strict popup blocking: a target="_blank"/"_new" anchor that points to a
+    // non-trusted host is a popunder vector, so block it regardless of whether
+    // the destination already looks ad-like. Trusted + social hosts pass.
+    const protocol = (parsedUrl.protocol || "").toLowerCase();
+    if (
+      isPopupGuardEnabled() &&
+      targetOpensNewWindow(anchor.getAttribute("target")) &&
+      (protocol === "http:" || protocol === "https:") &&
+      !isTrustedPopupDestination((parsedUrl.hostname || "").toLowerCase())
+    ) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+
     if (!isExternalAdLikeUrl(parsedUrl)) return;
 
     event.preventDefault();

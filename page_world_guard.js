@@ -45,16 +45,16 @@
   if (!isTargetHost(currentHost())) return;
 
   var marker = window.__privacyShieldGuardInstalled;
-  if (marker && marker.owner === "privacy-shield" && marker.version >= 3) return;
+  if (marker && marker.owner === "privacy-shield" && marker.version >= 4) return;
   try {
     Object.defineProperty(window, "__privacyShieldGuardInstalled", {
       configurable: false,
       enumerable: false,
       writable: false,
-      value: { owner: "privacy-shield", version: 3 }
+      value: { owner: "privacy-shield", version: 4 }
     });
   } catch (_) {
-    try { window.__privacyShieldGuardInstalled = { owner: "privacy-shield", version: 3 }; } catch (__) {}
+    try { window.__privacyShieldGuardInstalled = { owner: "privacy-shield", version: 4 }; } catch (__) {}
   }
 
   var detectorSettings = cfg.detectorSettings || {};
@@ -79,9 +79,14 @@
     "interlinecustomroofingllc.com",
     "static.nresystems.com"
   ];
+  var popupAllowedExternalHosts = cfg.popupAllowedExternalHosts || [];
 
   function featureEnabled(name) {
     return killSwitches[name] !== false;
+  }
+
+  function isPopupAllowedExternalHost(host) {
+    return hostMatchesAnySuffix(host, popupAllowedExternalHosts);
   }
 
   var diagnostics = {
@@ -443,6 +448,67 @@
     return false;
   }
 
+  // Popup policy is stricter than same-tab navigation: new windows/tabs are the
+  // popunder vector, so default-DENY and only allow trusted destinations. This
+  // runs inside ArabSeed pages and their streaming iframes (all target hosts),
+  // killing window.open popunders even to brand-new ad domains.
+  function shouldBlockPopup(url) {
+    if (!featureEnabled("popupGuard")) return false;
+    var raw = url == null ? "" : String(url).trim();
+    // The classic popunder opens a blank window then assigns .location later.
+    if (raw === "" || raw.toLowerCase() === "about:blank") return true;
+    var parsed;
+    try {
+      parsed = new URL(raw, location.href);
+    } catch (_) {
+      return true;
+    }
+    var protocol = String(parsed.protocol || "").toLowerCase();
+    if (dangerousProtocols.indexOf(protocol) !== -1) return true;
+    if (protocol !== "http:" && protocol !== "https:") return true;
+    var host = String(parsed.hostname || "").toLowerCase();
+    if (!host) return true;
+    if (isKnownAdRedirectHost(host)) return true;
+    if (isTargetHost(host)) return false;
+    if (isTrustedNavigationHost(host)) return false;
+    if (isPopupAllowedExternalHost(host)) return false;
+    return true;
+  }
+
+  function noop() {}
+
+  // Returned in place of a real window when a popup is blocked, so popunder
+  // scripts that chain `.location = adUrl` / `.focus()` neither throw nor open.
+  function makeStubWindow() {
+    var stubLocation = {
+      href: "about:blank",
+      assign: noop,
+      replace: noop,
+      reload: noop,
+      toString: function () { return "about:blank"; }
+    };
+    var stub = {
+      closed: true,
+      name: "",
+      opener: null,
+      location: stubLocation,
+      document: { write: noop, writeln: noop, open: noop, close: noop },
+      focus: noop,
+      blur: noop,
+      close: noop,
+      moveTo: noop,
+      resizeTo: noop,
+      postMessage: noop,
+      open: function () { return makeStubWindow(); }
+    };
+    return stub;
+  }
+
+  function targetOpensNewWindow(target) {
+    var value = String(target || "").toLowerCase();
+    return value === "_blank" || value === "_new";
+  }
+
   var nativeSetTimeout = window.setTimeout;
   var nativeSetInterval = window.setInterval;
   var nativeRequestAnimationFrame = window.requestAnimationFrame;
@@ -754,7 +820,11 @@
     var nativeOpen = window.open;
     if (typeof nativeOpen === "function") {
       var openWrapper = function (url) {
-        if (shouldBlockUrl(url, "window.open")) return null;
+        if (shouldBlockPopup(url)) {
+          recordDetectorHit("popup-blocked");
+          diagnostics.blockedNavigations += 1;
+          return makeStubWindow();
+        }
         return nativeOpen.apply(this, arguments);
       };
       defineFunctionShape(openWrapper, nativeOpen, "open");
@@ -805,7 +875,11 @@
       var anchorClickWrapper = function () {
         try {
           var href = this.getAttribute && this.getAttribute("href");
-          if (href && shouldBlockUrl(href, "anchor.click")) return undefined;
+          if (href) {
+            var anchorTarget = this.getAttribute && this.getAttribute("target");
+            if (targetOpensNewWindow(anchorTarget) && shouldBlockPopup(href)) return undefined;
+            if (shouldBlockUrl(href, "anchor.click")) return undefined;
+          }
         } catch (_) {}
         return nativeAnchorClick.apply(this, arguments);
       };
@@ -818,7 +892,11 @@
       var formSubmitWrapper = function () {
         try {
           var action = this.getAttribute && this.getAttribute("action");
-          if (action && shouldBlockUrl(action, "form.submit")) return undefined;
+          if (action) {
+            var formTarget = this.getAttribute && this.getAttribute("target");
+            if (targetOpensNewWindow(formTarget) && shouldBlockPopup(action)) return undefined;
+            if (shouldBlockUrl(action, "form.submit")) return undefined;
+          }
         } catch (_) {}
         return nativeFormSubmit.apply(this, arguments);
       };

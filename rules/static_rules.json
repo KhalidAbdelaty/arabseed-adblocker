@@ -405,7 +405,8 @@
     "condition": {
       "requestDomains": [
         "interlinecustomroofingllc.com",
-        "static.nresystems.com"
+        "static.nresystems.com",
+        "9instatement.com"
       ],
       "resourceTypes": [
         "main_frame",

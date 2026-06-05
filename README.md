@@ -29,6 +29,16 @@ The extension uses a warm editorial palette inspired by Anthropic-style design:
 cream backgrounds, charcoal text, burnt-orange accents, soft gradients, rounded
 cards, and a custom shield/play logo in `icons/arabseed-shield.svg`.
 
+## What's new in 1.1.1
+
+- Comprehensive popup/popunder blocking on ArabSeed pages and their streaming
+  iframes: `window.open` is gated so only trusted destinations can open a new
+  window (blocked popups get a harmless stub instead of opening), and
+  `target="_blank"` ad anchors to non-trusted hosts are cancelled. The site's
+  own social/share links stay allowed via a small allowlist, and a `popupGuard`
+  kill switch in `target_config.js` can disable it. Also blocks the
+  `9instatement.com` popunder network at the network layer.
+
 ## What's new in 1.1.0
 
 - Tracks ArabSeed's current official domains (`arabseed.show`, `arabseed.xyz`,
