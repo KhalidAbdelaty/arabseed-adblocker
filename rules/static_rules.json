@@ -418,5 +418,95 @@
         "websocket"
       ]
     }
+  },
+  {
+    "id": 4004,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "propellerads.com",
+        "propu.net",
+        "propellerads.net",
+        "propellerpops.com",
+        "monetag.com",
+        "adsterra.com",
+        "adsterratools.com",
+        "adsterratech.com",
+        "highperformanceformat.com",
+        "hilltopads.com",
+        "hilltopads.net",
+        "clickadu.com",
+        "clickadu.net",
+        "exoclick.com",
+        "exosrv.com",
+        "realsrv.com",
+        "juicyads.com",
+        "poweredby.jads.co",
+        "adcash.com",
+        "ad-maven.com",
+        "ad-maven.net",
+        "popads.net",
+        "popadscdn.net",
+        "popcash.net",
+        "popmyads.com",
+        "galaksion.com",
+        "onclicka.com",
+        "onclickalgo.com",
+        "onclickperformance.com",
+        "rollerads.com",
+        "clickadilla.com",
+        "tsyndicate.com",
+        "trafficstars.com",
+        "trafficjunky.net",
+        "ero-advertising.com"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "websocket",
+        "object",
+        "media"
+      ]
+    }
+  },
+  {
+    "id": 4005,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "adnium.com",
+        "trafficfactory.biz",
+        "bidvertiser.com",
+        "adservme.com",
+        "adskeeper.com",
+        "yoszi.com",
+        "d3rem.com",
+        "crxcra.com",
+        "wild-match.com",
+        "normalmotor.com",
+        "303bus.net",
+        "jcphi.com",
+        "jsccu.com",
+        "mctracking.io",
+        "mctracking.com"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "websocket",
+        "object",
+        "media"
+      ]
+    }
   }
 ]

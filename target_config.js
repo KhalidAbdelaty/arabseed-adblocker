@@ -47,7 +47,16 @@
     "f75s.com",
     "luluvdo.com",
     "luluvid.com",
-    "frdl.io"
+    "frdl.io",
+    "egybest.co.in",
+    "egybests.live",
+    "cimawbas.tv",
+    "mycima.cc",
+    "fasselhd.com",
+    "fasel-hd.com",
+    "cima4u.garden",
+    "cimalight.co",
+    "watanflix.com"
   ];
   var downloadDeliveryHosts = [
     "cdn.boutique"
@@ -74,6 +83,33 @@
     "whatsapp.com",
     "linkedin.com"
   ];
+  // Known ad / popunder networks. Used by the page guards on ALL sites to block
+  // window.open / clicks whose destination is one of these, and mirrored at the
+  // network layer in rules/static_rules.json.
+  var popunderHosts = [
+    "propellerads.com", "propu.net", "propellerads.net", "propellerpops.com",
+    "monetag.com",
+    "adsterra.com", "adsterratools.com", "adsterratech.com", "highperformanceformat.com",
+    "hilltopads.com", "hilltopads.net",
+    "clickadu.com", "clickadu.net",
+    "exoclick.com", "exosrv.com", "realsrv.com",
+    "juicyads.com", "poweredby.jads.co",
+    "adcash.com",
+    "ad-maven.com", "ad-maven.net",
+    "popads.net", "popadscdn.net",
+    "popcash.net", "popmyads.com",
+    "galaksion.com",
+    "onclicka.com", "onclickalgo.com", "onclickperformance.com",
+    "rollerads.com",
+    "clickadilla.com", "tsyndicate.com",
+    "trafficstars.com", "trafficjunky.net",
+    "ero-advertising.com",
+    "mgid.com", "adskeeper.com",
+    "adnium.com", "trafficfactory.biz", "bidvertiser.com", "adservme.com",
+    "yoszi.com", "d3rem.com", "crxcra.com", "wild-match.com",
+    "9instatement.com", "normalmotor.com", "303bus.net", "jcphi.com", "jsccu.com",
+    "mctracking.io", "mctracking.com"
+  ];
 
   var config = {
     version: 3,
@@ -82,6 +118,7 @@
     downloadDeliveryHosts: downloadDeliveryHosts.slice(),
     adRedirectHosts: adRedirectHosts.slice(),
     popupAllowedExternalHosts: popupAllowedExternalHosts.slice(),
+    popunderHosts: popunderHosts.slice(),
     baitSelectors: [
       "#adex",
       "#advert1",
@@ -188,6 +225,7 @@
     Object.freeze(config.dangerousProtocols);
     Object.freeze(config.adRedirectHosts);
     Object.freeze(config.popupAllowedExternalHosts);
+    Object.freeze(config.popunderHosts);
     Object.freeze(config.overlayAdSelectors);
     Object.freeze(config.detectorSettings);
     Object.freeze(config.killSwitches);

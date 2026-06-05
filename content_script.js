@@ -55,6 +55,7 @@
     "static.nresystems.com"
   ];
   const ASD_POPUP_ALLOWED_EXTERNAL_HOSTS = TARGET_CONFIG.popupAllowedExternalHosts || [];
+  const ASD_POPUNDER_HOSTS = TARGET_CONFIG.popunderHosts || [];
   const ASD_KILL_SWITCHES = TARGET_CONFIG.killSwitches || {};
   const ASD_WARNING_TEXT_PHRASES = TARGET_CONFIG.warningTextPhrases || [
     "قم بإستخدام متصفح اخر",
@@ -297,6 +298,10 @@
 
   function isKnownAdRedirectHost(host) {
     return hostMatchesAnySuffix(host, ASD_AD_REDIRECT_HOSTS);
+  }
+
+  function isKnownAdHost(host) {
+    return isKnownAdRedirectHost(host) || hostMatchesAnySuffix(host, ASD_POPUNDER_HOSTS);
   }
 
   function isPopupGuardEnabled() {
@@ -822,6 +827,73 @@
     return false;
   }
 
+  // Global (all-sites) guard: cancel clicks whose destination is a known ad /
+  // popunder network. Safe everywhere because it only acts on known ad hosts.
+  let globalAdClickGuardAttached = false;
+
+  function findAnchorFromEvent(event) {
+    let anchor = null;
+    if (typeof event.composedPath === "function") {
+      const path = event.composedPath();
+      for (const node of path) {
+        if (node && node.tagName === "A") {
+          anchor = node;
+          break;
+        }
+      }
+    }
+    if (!anchor && event.target && typeof event.target.closest === "function") {
+      anchor = event.target.closest("a[href]");
+    }
+    return anchor;
+  }
+
+  function handleGlobalAdHostClick(event) {
+    if (!isPopupGuardEnabled()) return;
+    const anchor = findAnchorFromEvent(event);
+    if (!anchor) return;
+    const href = anchor.getAttribute("href");
+    if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(href, location.href);
+    } catch (_) {
+      return;
+    }
+    const protocol = (parsedUrl.protocol || "").toLowerCase();
+    if (protocol !== "http:" && protocol !== "https:") return;
+    const host = (parsedUrl.hostname || "").toLowerCase();
+    if (!host || !isKnownAdHost(host)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+
+  function startGlobalAdClickGuard() {
+    if (globalAdClickGuardAttached) return;
+    globalAdClickGuardAttached = true;
+    try {
+      document.addEventListener("click", handleGlobalAdHostClick, true);
+      document.addEventListener("auxclick", handleGlobalAdHostClick, true);
+      document.addEventListener("mousedown", handleGlobalAdHostClick, true);
+      document.addEventListener("pointerdown", handleGlobalAdHostClick, true);
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  function stopGlobalAdClickGuard() {
+    if (!globalAdClickGuardAttached) return;
+    globalAdClickGuardAttached = false;
+    try {
+      document.removeEventListener("click", handleGlobalAdHostClick, true);
+      document.removeEventListener("auxclick", handleGlobalAdHostClick, true);
+      document.removeEventListener("mousedown", handleGlobalAdHostClick, true);
+      document.removeEventListener("pointerdown", handleGlobalAdHostClick, true);
+    } catch (_) {
+      // ignore
+    }
+  }
+
   async function readSettings() {
     try {
       const result = await chrome.storage.local.get("privacyShieldSettings");
@@ -838,6 +910,7 @@
       stopObserver();
       stopAsdObserver();
       stopAsdClickGuard();
+      stopGlobalAdClickGuard();
       return;
     }
     if (isHostAllowlisted(hostFromLocation(), settings.allowlist || [])) {
@@ -845,6 +918,7 @@
       stopObserver();
       stopAsdObserver();
       stopAsdClickGuard();
+      stopGlobalAdClickGuard();
       return;
     }
     injectStyle();
@@ -858,6 +932,8 @@
       );
     }
     startObserver();
+    // Block clicks to known ad/popunder networks on every site.
+    startGlobalAdClickGuard();
 
     if (isAsdHost(hostFromLocation())) {
       patchAsdDownloadUi(document);

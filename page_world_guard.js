@@ -42,19 +42,23 @@
     return hostMatchesAnySuffix(host, cfg.trustedNavigationHosts || []);
   }
 
-  if (!isTargetHost(currentHost())) return;
+  // The guard runs on every site now. On ArabSeed-class / streaming target hosts
+  // it applies the full anti-detection + strict popup blocking. Everywhere else
+  // it installs only a conservative popup blocker (window.open / clicks to known
+  // ad-popunder networks), so normal sites keep working.
+  var fullGuardHost = isTargetHost(currentHost());
 
   var marker = window.__privacyShieldGuardInstalled;
-  if (marker && marker.owner === "privacy-shield" && marker.version >= 4) return;
+  if (marker && marker.owner === "privacy-shield" && marker.version >= 5) return;
   try {
     Object.defineProperty(window, "__privacyShieldGuardInstalled", {
       configurable: false,
       enumerable: false,
       writable: false,
-      value: { owner: "privacy-shield", version: 4 }
+      value: { owner: "privacy-shield", version: 5 }
     });
   } catch (_) {
-    try { window.__privacyShieldGuardInstalled = { owner: "privacy-shield", version: 4 }; } catch (__) {}
+    try { window.__privacyShieldGuardInstalled = { owner: "privacy-shield", version: 5 }; } catch (__) {}
   }
 
   var detectorSettings = cfg.detectorSettings || {};
@@ -80,6 +84,7 @@
     "static.nresystems.com"
   ];
   var popupAllowedExternalHosts = cfg.popupAllowedExternalHosts || [];
+  var popunderHosts = cfg.popunderHosts || [];
 
   function featureEnabled(name) {
     return killSwitches[name] !== false;
@@ -87,6 +92,10 @@
 
   function isPopupAllowedExternalHost(host) {
     return hostMatchesAnySuffix(host, popupAllowedExternalHosts);
+  }
+
+  function isKnownAdHost(host) {
+    return isKnownAdRedirectHost(host) || hostMatchesAnySuffix(host, popunderHosts);
   }
 
   var diagnostics = {
@@ -129,20 +138,22 @@
     return hostMatchesAnySuffix(host, adRedirectHosts);
   }
 
-  try {
-    Object.defineProperty(window, "__privacyShieldGuardDiagnostics", {
-      configurable: true,
-      enumerable: false,
-      get: function () {
-        return {
-          detectorHits: Object.assign({}, diagnostics.detectorHits),
-          patchReapplyEvents: diagnostics.patchReapplyEvents,
-          strictRuleHints: Object.assign({}, diagnostics.strictRuleHints),
-          blockedNavigations: diagnostics.blockedNavigations
-        };
-      }
-    });
-  } catch (_) {}
+  function exposeGuardDiagnostics() {
+    try {
+      Object.defineProperty(window, "__privacyShieldGuardDiagnostics", {
+        configurable: true,
+        enumerable: false,
+        get: function () {
+          return {
+            detectorHits: Object.assign({}, diagnostics.detectorHits),
+            patchReapplyEvents: diagnostics.patchReapplyEvents,
+            strictRuleHints: Object.assign({}, diagnostics.strictRuleHints),
+            blockedNavigations: diagnostics.blockedNavigations
+          };
+        }
+      });
+    } catch (_) {}
+  }
 
   var nativeFunctionToString = Function.prototype.toString;
   var spoofedSources = typeof WeakMap === "function" ? new WeakMap() : null;
@@ -193,7 +204,8 @@
     } catch (_) {}
   }
 
-  patchFunctionToString();
+  // Note: patchFunctionToString() is only invoked for full-guard target hosts
+  // (see runGuard). General sites must not get a global Function.prototype patch.
 
   function defineValue(target, key, value) {
     try {
@@ -452,23 +464,28 @@
   // popunder vector, so default-DENY and only allow trusted destinations. This
   // runs inside ArabSeed pages and their streaming iframes (all target hosts),
   // killing window.open popunders even to brand-new ad domains.
-  function shouldBlockPopup(url) {
+  function shouldBlockPopup(url, strict) {
     if (!featureEnabled("popupGuard")) return false;
     var raw = url == null ? "" : String(url).trim();
     // The classic popunder opens a blank window then assigns .location later.
-    if (raw === "" || raw.toLowerCase() === "about:blank") return true;
+    // On general sites a blank popup can be legitimate, so only block it strictly.
+    if (raw === "" || raw.toLowerCase() === "about:blank") return strict === true;
     var parsed;
     try {
       parsed = new URL(raw, location.href);
     } catch (_) {
-      return true;
+      return strict === true;
     }
     var protocol = String(parsed.protocol || "").toLowerCase();
     if (dangerousProtocols.indexOf(protocol) !== -1) return true;
-    if (protocol !== "http:" && protocol !== "https:") return true;
+    if (protocol !== "http:" && protocol !== "https:") return strict === true;
     var host = String(parsed.hostname || "").toLowerCase();
-    if (!host) return true;
-    if (isKnownAdRedirectHost(host)) return true;
+    if (!host) return strict === true;
+    // Always block popups to known ad / popunder networks, on every site.
+    if (isKnownAdHost(host)) return true;
+    // General sites (lite mode): only the known-ad-host block above applies.
+    if (!strict) return false;
+    // Target hosts (strict mode): default-deny new windows except trusted + social.
     if (isTargetHost(host)) return false;
     if (isTrustedNavigationHost(host)) return false;
     if (isPopupAllowedExternalHost(host)) return false;
@@ -816,24 +833,67 @@
     });
   }
 
-  function patchNavigation() {
+  // Popup blocking is installed on every site. On general sites `strict` is
+  // false (only window.open to known ad/popunder hosts is blocked); on target
+  // hosts it is full default-deny (see shouldBlockPopup).
+  function patchPopupOpen(strict) {
     var nativeOpen = window.open;
-    if (typeof nativeOpen === "function") {
-      var openWrapper = function (url) {
-        if (shouldBlockPopup(url)) {
-          recordDetectorHit("popup-blocked");
-          diagnostics.blockedNavigations += 1;
-          return makeStubWindow();
-        }
-        return nativeOpen.apply(this, arguments);
-      };
-      defineFunctionShape(openWrapper, nativeOpen, "open");
-      defineValue(window, "open", openWrapper);
+    if (typeof nativeOpen !== "function") return;
+    var openWrapper = function (url) {
+      if (shouldBlockPopup(url, strict)) {
+        recordDetectorHit("popup-blocked");
+        diagnostics.blockedNavigations += 1;
+        return makeStubWindow();
+      }
+      return nativeOpen.apply(this, arguments);
+    };
+    defineFunctionShape(openWrapper, nativeOpen, "open");
+    defineValue(window, "open", openWrapper);
+    if (strict) {
       registerIntegrity("open", function () { return window.open; }, function () {
         defineValue(window, "open", openWrapper);
       });
     }
+  }
 
+  function patchPopupClicks(strict, fullMode) {
+    try {
+      var nativeAnchorClick = HTMLAnchorElement.prototype.click;
+      var anchorClickWrapper = function () {
+        try {
+          var href = this.getAttribute && this.getAttribute("href");
+          if (href) {
+            var anchorTarget = this.getAttribute && this.getAttribute("target");
+            if (targetOpensNewWindow(anchorTarget) && shouldBlockPopup(href, strict)) return undefined;
+            if (fullMode && shouldBlockUrl(href, "anchor.click")) return undefined;
+          }
+        } catch (_) {}
+        return nativeAnchorClick.apply(this, arguments);
+      };
+      defineFunctionShape(anchorClickWrapper, nativeAnchorClick, "click");
+      defineValue(HTMLAnchorElement.prototype, "click", anchorClickWrapper);
+    } catch (_) {}
+
+    try {
+      var nativeFormSubmit = HTMLFormElement.prototype.submit;
+      var formSubmitWrapper = function () {
+        try {
+          var action = this.getAttribute && this.getAttribute("action");
+          if (action) {
+            var formTarget = this.getAttribute && this.getAttribute("target");
+            if (targetOpensNewWindow(formTarget) && shouldBlockPopup(action, strict)) return undefined;
+            if (fullMode && shouldBlockUrl(action, "form.submit")) return undefined;
+          }
+        } catch (_) {}
+        return nativeFormSubmit.apply(this, arguments);
+      };
+      defineFunctionShape(formSubmitWrapper, nativeFormSubmit, "submit");
+      defineValue(HTMLFormElement.prototype, "submit", formSubmitWrapper);
+    } catch (_) {}
+  }
+
+  // Same-tab navigation hardening; target hosts only (signal-based).
+  function patchFullNavigation() {
     try {
       var locProto = window.Location && window.Location.prototype;
       if (locProto) {
@@ -868,40 +928,6 @@
           });
         }
       }
-    } catch (_) {}
-
-    try {
-      var nativeAnchorClick = HTMLAnchorElement.prototype.click;
-      var anchorClickWrapper = function () {
-        try {
-          var href = this.getAttribute && this.getAttribute("href");
-          if (href) {
-            var anchorTarget = this.getAttribute && this.getAttribute("target");
-            if (targetOpensNewWindow(anchorTarget) && shouldBlockPopup(href)) return undefined;
-            if (shouldBlockUrl(href, "anchor.click")) return undefined;
-          }
-        } catch (_) {}
-        return nativeAnchorClick.apply(this, arguments);
-      };
-      defineFunctionShape(anchorClickWrapper, nativeAnchorClick, "click");
-      defineValue(HTMLAnchorElement.prototype, "click", anchorClickWrapper);
-    } catch (_) {}
-
-    try {
-      var nativeFormSubmit = HTMLFormElement.prototype.submit;
-      var formSubmitWrapper = function () {
-        try {
-          var action = this.getAttribute && this.getAttribute("action");
-          if (action) {
-            var formTarget = this.getAttribute && this.getAttribute("target");
-            if (targetOpensNewWindow(formTarget) && shouldBlockPopup(action)) return undefined;
-            if (shouldBlockUrl(action, "form.submit")) return undefined;
-          }
-        } catch (_) {}
-        return nativeFormSubmit.apply(this, arguments);
-      };
-      defineFunctionShape(formSubmitWrapper, nativeFormSubmit, "submit");
-      defineValue(HTMLFormElement.prototype, "submit", formSubmitWrapper);
     } catch (_) {}
 
     try {
@@ -969,15 +995,31 @@
     } catch (_) {}
   }
 
-  patchBraveSignals();
-  patchSchedulers();
-  patchDynamicCode();
-  patchDetectorGlobals();
-  patchDocumentQueries();
-  patchMutationObserver();
-  patchNavigation();
-  ensureBaitElement("#adex");
-  injectGuardStyle();
-  hideBrowserWarnings(document);
-  startIntegrityWatchdog();
+  function runGuard() {
+    // Conservative popup blocking runs on every site; strictness depends on host.
+    patchPopupOpen(fullGuardHost);
+    patchPopupClicks(fullGuardHost, fullGuardHost);
+
+    // General (non-target) sites stop here: no global prototype/document patches.
+    if (!fullGuardHost) return;
+
+    // Full anti-detection hardening for ArabSeed-class / streaming target hosts.
+    exposeGuardDiagnostics();
+    patchFunctionToString();
+    patchBraveSignals();
+    patchSchedulers();
+    patchDynamicCode();
+    patchDetectorGlobals();
+    patchDocumentQueries();
+    patchMutationObserver();
+    patchFullNavigation();
+    ensureBaitElement("#adex");
+    injectGuardStyle();
+    hideBrowserWarnings(document);
+    startIntegrityWatchdog();
+  }
+
+  try {
+    runGuard();
+  } catch (_) {}
 })();

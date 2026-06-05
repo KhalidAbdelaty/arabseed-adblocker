@@ -29,6 +29,23 @@ The extension uses a warm editorial palette inspired by Anthropic-style design:
 cream backgrounds, charcoal text, burnt-orange accents, soft gradients, rounded
 cards, and a custom shield/play logo in `icons/arabseed-shield.svg`.
 
+## What's new in 1.2.0
+
+- Site-wide ad and popup blocking, not just ArabSeed:
+  - The global `declarativeNetRequest` rules now block a large set of ad and
+    popunder networks (PropellerAds/Monetag, Adsterra, HilltopAds, Clickadu,
+    ExoClick/realsrv, AdMaven, PopAds, Galaksion, Onclicka, RollerAds,
+    ClickAdilla/tsyndicate, and throwaway serving domains) at the network layer,
+    on every site.
+  - The page guard now runs on every site in a conservative "lite" mode that
+    only neutralizes `window.open` and clicks to known ad/popunder networks, so
+    normal sites keep working while popunders die.
+  - The isolated content script cancels clicks to known ad hosts on any site.
+- Popular Arabic/Egyptian/foreign streaming sites (EgyBest, MyCima/Cimawbas,
+  FaselHD, Cima4u, CimaLight, WatanFlix, and more) get the full anti-popup and
+  anti-detection guard. New streaming mirrors can be added with a single line in
+  `target_config.js` (the manifest no longer hardcodes the host list).
+
 ## What's new in 1.1.1
 
 - Comprehensive popup/popunder blocking on ArabSeed pages and their streaming
