@@ -397,5 +397,25 @@
       "urlFilter": "/prebid",
       "resourceTypes": ["script", "xmlhttprequest"]
     }
+  },
+  {
+    "id": 4003,
+    "priority": 2,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "interlinecustomroofingllc.com",
+        "static.nresystems.com"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "image",
+        "ping",
+        "websocket"
+      ]
+    }
   }
 ]

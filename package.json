@@ -1,0 +1,14 @@
+{
+  "name": "arabseed-shield",
+  "version": "1.1.0",
+  "private": true,
+  "description": "ArabSeed Shield - local-only MV3 ad blocker and anti-detection shield by Khalid Abdelaty.",
+  "type": "module",
+  "scripts": {
+    "icons": "node scripts/generate-icons.mjs",
+    "validate": "node scripts/validate.mjs"
+  },
+  "author": "Khalid Abdelaty",
+  "homepage": "https://github.com/KhalidAbdelaty/arabseed-adblocker",
+  "license": "SEE LICENSE IN README.md"
+}

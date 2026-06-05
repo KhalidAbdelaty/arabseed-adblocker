@@ -45,16 +45,16 @@
   if (!isTargetHost(currentHost())) return;
 
   var marker = window.__privacyShieldGuardInstalled;
-  if (marker && marker.owner === "privacy-shield" && marker.version >= 2) return;
+  if (marker && marker.owner === "privacy-shield" && marker.version >= 3) return;
   try {
     Object.defineProperty(window, "__privacyShieldGuardInstalled", {
       configurable: false,
       enumerable: false,
       writable: false,
-      value: { owner: "privacy-shield", version: 2 }
+      value: { owner: "privacy-shield", version: 3 }
     });
   } catch (_) {
-    try { window.__privacyShieldGuardInstalled = { owner: "privacy-shield", version: 2 }; } catch (__) {}
+    try { window.__privacyShieldGuardInstalled = { owner: "privacy-shield", version: 3 }; } catch (__) {}
   }
 
   var detectorSettings = cfg.detectorSettings || {};
@@ -75,6 +75,10 @@
     "لتتمكن من التحميل"
   ];
   var dangerousProtocols = cfg.dangerousProtocols || ["javascript:", "data:"];
+  var adRedirectHosts = cfg.adRedirectHosts || [
+    "interlinecustomroofingllc.com",
+    "static.nresystems.com"
+  ];
 
   function featureEnabled(name) {
     return killSwitches[name] !== false;
@@ -114,6 +118,10 @@
   function recordStrictRuleHint(key) {
     bump(diagnostics.strictRuleHints, key);
     emitDiagnostic("strictRuleHint", key);
+  }
+
+  function isKnownAdRedirectHost(host) {
+    return hostMatchesAnySuffix(host, adRedirectHosts);
   }
 
   try {
@@ -345,6 +353,18 @@
       weight: 7,
       all: ["location"],
       any: ["atob(", "fromcharcode", "decodeuricomponent", "eval("]
+    },
+    {
+      id: "hostile-overlay-injector",
+      weight: 9,
+      all: ["2147483647"],
+      any: ["interlinecustomroofingllc", "static.nresystems", "container-", "pointer-events:auto"]
+    },
+    {
+      id: "ad-redirect-host",
+      weight: 10,
+      all: ["interlinecustomroofingllc"],
+      any: ["window.open", "href=", "target='_blank'", "location"]
     }
   ];
 
@@ -406,6 +426,11 @@
     if (protocol !== "http:" && protocol !== "https:") return false;
     var host = String(parsed.hostname || "").toLowerCase();
     if (!host) return false;
+    if (isKnownAdRedirectHost(host)) {
+      recordDetectorHit("ad-redirect-host");
+      diagnostics.blockedNavigations += 1;
+      return true;
+    }
     if (isTargetHost(host)) return false;
     if (isTrustedNavigationHost(host)) return false;
     if (isLikelyObfuscatedPath(parsed)) {
@@ -413,8 +438,9 @@
       diagnostics.blockedNavigations += 1;
       return true;
     }
-    diagnostics.blockedNavigations += 1;
-    return true;
+    // No positive ad/redirect signal: allow navigation so unknown ArabSeed
+    // mirrors and legitimate external links are not stranded.
+    return false;
   }
 
   var nativeSetTimeout = window.setTimeout;
@@ -824,7 +850,8 @@
         "#advert1, .cjv, [id^='advert'], [class*='click-overlay'], " +
         "[class*='anti-adblock'], [id*='anti-adblock'], " +
         "[class*='brave'], [id*='brave'], [class*='browser'], [id*='browser'], " +
-        "[data-privacy-shield-hidden-warning='1'] {" +
+        "[data-privacy-shield-hidden-warning='1'], [data-privacy-shield-hidden-overlay='1'], " +
+        "iframe[id^='container-'], iframe[class^='container-'], div[id][style*='--rdata'] {" +
         "display: none !important;" +
         "visibility: hidden !important;" +
         "width: 0 !important;" +

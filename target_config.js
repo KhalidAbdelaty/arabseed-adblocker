@@ -8,9 +8,21 @@
   var targetHosts = [
     "asd.ink",
     "asd.homes",
+    "arabseed.com",
+    "arabseed.net",
+    "arabseed.sbs",
+    "arabseed.ink",
+    "arabseed.one",
+    "arabseed.co",
+    "arabseed.tv",
     "reviewrate.net",
     "reviewtech.me",
     "arabseed.me",
+    "arabseed.show",
+    "arabseed.xyz",
+    "arabseed.onl",
+    "arabseed.wiki",
+    "arabseed.lol",
     "seeeed.xyz",
     "fredl.ru",
     "filespayouts.com",
@@ -40,12 +52,17 @@
   var downloadDeliveryHosts = [
     "cdn.boutique"
   ];
+  var adRedirectHosts = [
+    "interlinecustomroofingllc.com",
+    "static.nresystems.com"
+  ];
 
   var config = {
-    version: 2,
+    version: 3,
     targetHosts: targetHosts.slice(),
     trustedNavigationHosts: targetHosts.concat(downloadDeliveryHosts),
     downloadDeliveryHosts: downloadDeliveryHosts.slice(),
+    adRedirectHosts: adRedirectHosts.slice(),
     baitSelectors: [
       "#adex",
       "#advert1",
@@ -67,6 +84,18 @@
       "[class*='browser']",
       ".alert-danger",
       ".notice-danger"
+    ],
+    overlayAdSelectors: [
+      "iframe[id^='container-']",
+      "iframe[class^='container-']",
+      "iframe[style*='z-index: 2147483647']",
+      "iframe[style*='z-index:2147483647']",
+      "div[id][style*='--rdata']",
+      "div[style*='z-index: 2147483647']",
+      "div[style*='z-index:2147483647']",
+      "div[style*='pointer-events: auto'][style*='position: fixed']",
+      "a[href*='interlinecustomroofingllc.com']",
+      "a[href*='static.nresystems.com']"
     ],
     warningTextPhrases: [
       "قم بإستخدام متصفح اخر",
@@ -137,6 +166,8 @@
     Object.freeze(config.downloadSelectors);
     Object.freeze(config.watchSelectors);
     Object.freeze(config.dangerousProtocols);
+    Object.freeze(config.adRedirectHosts);
+    Object.freeze(config.overlayAdSelectors);
     Object.freeze(config.detectorSettings);
     Object.freeze(config.killSwitches);
     Object.freeze(config);

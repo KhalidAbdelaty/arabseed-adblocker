@@ -58,14 +58,17 @@ function hostFromUrl(url) {
   }
 }
 
-function rootDomain(host) {
-  if (!host) return null;
-  // Naive registrable-domain hint: take last two labels. Good enough for the
-  // popup's "is this site allowlisted" check; the service worker uses the
-  // exact host the user supplied for storage.
-  const parts = host.split(".");
-  if (parts.length <= 2) return host;
-  return parts.slice(-2).join(".");
+function isHostAllowlisted(host, allowlist) {
+  // Mirrors the service worker / content-script suffix matching: a host is
+  // allowlisted when it equals an entry or is a subdomain of one. This keeps
+  // the popup toggle in sync with how the allowlist is actually applied.
+  if (!host || !Array.isArray(allowlist)) return false;
+  for (const entry of allowlist) {
+    if (typeof entry !== "string") continue;
+    const e = entry.toLowerCase();
+    if (host === e || host.endsWith("." + e)) return true;
+  }
+  return false;
 }
 
 async function loadActiveTab() {
@@ -99,9 +102,7 @@ async function refresh() {
 
   const canTargetSite = Boolean(currentHost);
   const allowlist = state.settings.allowlist || [];
-  const isAllowed =
-    canTargetSite &&
-    (allowlist.includes(currentHost) || allowlist.includes(rootDomain(currentHost)));
+  const isAllowed = canTargetSite && isHostAllowlisted(currentHost, allowlist);
   els.site.checked = canTargetSite ? !isAllowed : false;
   els.site.disabled = !canTargetSite || !state.settings.enabled;
   els.strict.disabled = !state.settings.enabled;
@@ -129,6 +130,7 @@ els.enabled.addEventListener("change", async () => {
   const result = await send("setEnabled", { enabled: els.enabled.checked });
   els.enabled.disabled = false;
   if (!result.ok) flashStatus(result.error || "Failed to update", true);
+  else flashStatus("Reload open tabs to apply changes.");
   await refresh();
 });
 
@@ -137,6 +139,7 @@ els.strict.addEventListener("change", async () => {
   const result = await send("setStrictMode", { strictMode: els.strict.checked });
   els.strict.disabled = false;
   if (!result.ok) flashStatus(result.error || "Failed to update", true);
+  else flashStatus("Reload open tabs to apply changes.");
   await refresh();
 });
 

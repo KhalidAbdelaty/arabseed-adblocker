@@ -116,6 +116,18 @@ body {
 }
 
 .card-help { margin: 0 0 12px 0; color: var(--fg-muted); font-size: 13px; }
+.card-note {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(217, 119, 87, 0.08);
+}
+.subhead {
+  margin: 16px 0 6px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fg-muted);
+}
 
 .inline-form {
   display: flex;

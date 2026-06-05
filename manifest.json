@@ -2,15 +2,15 @@
   "manifest_version": 3,
   "name": "ArabSeed Shield",
   "short_name": "ArabShield",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "ArabSeed-focused ad blocker and anti-detection shield by Khalid Abdelaty. Local-only, no telemetry, no remote code.",
   "minimum_chrome_version": "111",
 
   "icons": {
-    "16": "icons/arabseed-shield.svg",
-    "32": "icons/arabseed-shield.svg",
-    "48": "icons/arabseed-shield.svg",
-    "128": "icons/arabseed-shield.svg"
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
 
   "permissions": [
@@ -32,10 +32,10 @@
     "default_title": "ArabSeed Shield",
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icons/arabseed-shield.svg",
-      "32": "icons/arabseed-shield.svg",
-      "48": "icons/arabseed-shield.svg",
-      "128": "icons/arabseed-shield.svg"
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     }
   },
 
@@ -54,12 +54,36 @@
         "*://*.asd.ink/*",
         "*://asd.homes/*",
         "*://*.asd.homes/*",
+        "*://arabseed.com/*",
+        "*://*.arabseed.com/*",
+        "*://arabseed.net/*",
+        "*://*.arabseed.net/*",
+        "*://arabseed.sbs/*",
+        "*://*.arabseed.sbs/*",
+        "*://arabseed.ink/*",
+        "*://*.arabseed.ink/*",
+        "*://arabseed.one/*",
+        "*://*.arabseed.one/*",
+        "*://arabseed.co/*",
+        "*://*.arabseed.co/*",
+        "*://arabseed.tv/*",
+        "*://*.arabseed.tv/*",
         "*://reviewrate.net/*",
         "*://*.reviewrate.net/*",
         "*://reviewtech.me/*",
         "*://*.reviewtech.me/*",
         "*://arabseed.me/*",
         "*://*.arabseed.me/*",
+        "*://arabseed.show/*",
+        "*://*.arabseed.show/*",
+        "*://arabseed.xyz/*",
+        "*://*.arabseed.xyz/*",
+        "*://arabseed.onl/*",
+        "*://*.arabseed.onl/*",
+        "*://arabseed.wiki/*",
+        "*://*.arabseed.wiki/*",
+        "*://arabseed.lol/*",
+        "*://*.arabseed.lol/*",
         "*://seeeed.xyz/*",
         "*://*.seeeed.xyz/*",
         "*://fredl.ru/*",

@@ -27,7 +27,9 @@ const els = {
 
   statsList: $("stats-list"),
   resetStatsBtn: $("btn-reset-stats"),
-  diagnosticsList: $("diagnostics-list")
+  diagnosticsList: $("diagnostics-list"),
+  diagnosticsRecent: $("diagnostics-recent"),
+  resetDiagnosticsBtn: $("btn-reset-diagnostics")
 };
 
 const DOMAIN_REGEX = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
@@ -121,11 +123,50 @@ function renderDiagnostics(diagnostics = {}) {
     ["Detector signature hits", sumObjectValues(diagnostics.detectorHits)],
     ["Patch re-apply events", diagnostics.patchReapplyEvents || 0],
     ["Strict-rule collision hints", sumObjectValues(diagnostics.strictRuleHints)],
-    ["Last updated", diagnostics.lastUpdated || "Never"]
+    ["Last updated", formatTimestamp(diagnostics.lastUpdated)]
   ];
   els.diagnosticsList.replaceChildren(
     ...rows.map(([label, value]) => makeStatusRow(label, String(value)))
   );
+  renderRecentEvents(diagnostics.recentEvents || []);
+}
+
+function formatTimestamp(value) {
+  if (!value) return "Never";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString();
+}
+
+function renderRecentEvents(events) {
+  if (!els.diagnosticsRecent) return;
+  els.diagnosticsRecent.replaceChildren();
+  if (!Array.isArray(events) || events.length === 0) {
+    const li = document.createElement("li");
+    li.className = "empty";
+    li.textContent = "No recent events recorded.";
+    els.diagnosticsRecent.append(li);
+    return;
+  }
+  // Newest first, capped for readability.
+  const recent = events.slice(-12).reverse();
+  for (const event of recent) {
+    const li = document.createElement("li");
+    const left = document.createElement("span");
+    const key = document.createElement("strong");
+    key.textContent = String((event && event.key) || event.type || "event");
+    const host = document.createElement("span");
+    host.className = "entry-meta";
+    host.textContent = (event && event.host) || "";
+    left.append(key, document.createTextNode(" "), host);
+    const when = document.createElement("span");
+    when.className = "entry-meta";
+    when.textContent = event && Number.isFinite(event.at)
+      ? new Date(event.at).toLocaleTimeString()
+      : "";
+    li.append(left, when);
+    els.diagnosticsRecent.append(li);
+  }
 }
 
 function renderAllowlist(items) {
@@ -295,6 +336,10 @@ els.importInput.addEventListener("change", async (event) => {
     setBackupStatus("File too large.");
     return;
   }
+  if (!confirm("Import settings? This replaces your current allowlist and custom rules.")) {
+    setBackupStatus("Import cancelled.");
+    return;
+  }
   try {
     const text = await file.text();
     const payload = JSON.parse(text);
@@ -325,6 +370,12 @@ els.resetBtn.addEventListener("click", async () => {
 els.resetStatsBtn.addEventListener("click", async () => {
   if (!confirm("Reset local statistics?")) return;
   const r = await send("resetStats");
+  if (r.ok) await refresh();
+});
+
+els.resetDiagnosticsBtn.addEventListener("click", async () => {
+  if (!confirm("Reset deception diagnostics?")) return;
+  const r = await send("resetDeceptionDiagnostics");
   if (r.ok) await refresh();
 });
 

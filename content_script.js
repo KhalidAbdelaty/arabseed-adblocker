@@ -40,6 +40,20 @@
     TARGET_CONFIG.watchSelectors || DEFAULT_WATCH_SELECTORS
   ).join(",");
   const ASD_BAIT_SELECTORS = (TARGET_CONFIG.baitSelectors || ["#adex"]).join(",");
+  const ASD_OVERLAY_AD_SELECTORS = (
+    TARGET_CONFIG.overlayAdSelectors || [
+      "iframe[id^='container-']",
+      "iframe[class^='container-']",
+      "iframe[style*='z-index: 2147483647']",
+      "div[id][style*='--rdata']",
+      "div[style*='z-index: 2147483647']",
+      "div[style*='pointer-events: auto'][style*='position: fixed']"
+    ]
+  ).join(",");
+  const ASD_AD_REDIRECT_HOSTS = TARGET_CONFIG.adRedirectHosts || [
+    "interlinecustomroofingllc.com",
+    "static.nresystems.com"
+  ];
   const ASD_WARNING_TEXT_PHRASES = TARGET_CONFIG.warningTextPhrases || [
     "قم بإستخدام متصفح اخر",
     "قم باستخدام متصفح اخر",
@@ -279,6 +293,10 @@
     return hostMatchesAnySuffix(host, TARGET_CONFIG.downloadDeliveryHosts || []);
   }
 
+  function isKnownAdRedirectHost(host) {
+    return hostMatchesAnySuffix(host, ASD_AD_REDIRECT_HOSTS);
+  }
+
   function isLikelyObfuscatedPath(parsedUrl) {
     if (!parsedUrl) return false;
     const value = `${parsedUrl.pathname || ""}${parsedUrl.search || ""}`;
@@ -321,6 +339,38 @@
       node.setAttribute("data-privacy-shield-hidden-warning", "1");
     } catch (_) {
       // ignore
+    }
+  }
+
+  function hideAsdOverlayAdNode(node) {
+    if (!node || !node.style) return;
+    try {
+      node.style.setProperty("display", "none", "important");
+      node.style.setProperty("visibility", "hidden", "important");
+      node.style.setProperty("pointer-events", "none", "important");
+      node.style.setProperty("width", "0", "important");
+      node.style.setProperty("height", "0", "important");
+      node.setAttribute("aria-hidden", "true");
+      node.setAttribute("data-privacy-shield-hidden-overlay", "1");
+    } catch (_) {
+      // ignore
+    }
+  }
+
+  function hideAsdOverlayAdNodes(root) {
+    if (!isAsdHost(hostFromLocation())) return;
+    const scope = root && root.querySelectorAll ? root : document;
+    let nodes = [];
+    try {
+      nodes = scope.querySelectorAll(ASD_OVERLAY_AD_SELECTORS);
+    } catch (_) {
+      nodes = [];
+    }
+    for (const node of nodes) {
+      hideAsdOverlayAdNode(node);
+      if (node.parentElement && node.tagName === "A") {
+        hideAsdOverlayAdNode(node.parentElement);
+      }
     }
   }
 
@@ -475,10 +525,15 @@
 
     hardenAsdIframes(scope);
     keepAsdBaitVisible();
+    hideAsdOverlayAdNodes(scope);
     normalizeAsdDownloadLinks(scope);
   }
 
   function isExternalAdLikeUrl(parsedUrl) {
+    // Signal-based: only treat a destination as an ad/popunder when there is a
+    // positive signal. Default to allowing navigation so legitimate outbound
+    // links (mirrors, social, info pages) keep working even as ArabSeed rotates
+    // domains.
     if (!parsedUrl) return false;
     const protocol = (parsedUrl.protocol || "").toLowerCase();
     if (protocol !== "http:" && protocol !== "https:") return false;
@@ -486,8 +541,9 @@
     if (!host) return false;
     if (isAsdHost(host)) return false;
     if (isAsdPopupAllowedHost(host)) return false;
+    if (isKnownAdRedirectHost(host)) return true;
     if (isLikelyObfuscatedPath(parsedUrl)) return true;
-    return true;
+    return false;
   }
 
   function handleAsdGuardedClick(event) {
@@ -597,6 +653,7 @@
     if (protocol !== "http:" && protocol !== "https:") return "blocked";
     const host = (parsed.hostname || "").toLowerCase();
     if (!host) return "blocked";
+    if (isKnownAdRedirectHost(host)) return "blocked";
     if (isAsdHost(host)) return "trusted";
     if (isAsdPopupAllowedHost(host)) return "trusted";
     if (isLikelyObfuscatedPath(parsed)) return "blocked";

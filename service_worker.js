@@ -53,8 +53,12 @@ const DEFAULT_DECEPTION_DIAGNOSTICS = {
 const STRICT_COLLISION_RULE_IDS = new Set([5010, 5011, 5012]);
 const MAX_DECEPTION_RECENT_EVENTS = 40;
 
-const MAX_ALLOWLIST = ALLOWLIST_ID_END - ALLOWLIST_ID_START + 1;
-const MAX_CUSTOM_RULES = CUSTOM_ID_END - CUSTOM_ID_START + 1;
+// The dynamic rule ID ranges above are large, but Chromium caps the number of
+// dynamic rules an extension can register (guaranteed minimum 5000, shared
+// across all dynamic rules). Keep allowlist + custom usage comfortably under
+// that combined budget so the in-app limits trip before the browser rejects.
+const MAX_ALLOWLIST = 2000;
+const MAX_CUSTOM_RULES = 2000;
 
 // Per-tab in-memory counter; reset when a tab navigates to a new top-level URL.
 const perTabBlocked = new Map();
@@ -62,6 +66,11 @@ const perTabBlocked = new Map();
 // Throttle persistence of stats to avoid excessive writes.
 let pendingStatsFlush = false;
 let pendingStats = null;
+
+// Coalesce deception-diagnostic writes. The MAIN-world watchdog and detector
+// can fire many events per second; buffer them and flush in one storage write.
+let pendingDiagnosticsFlush = false;
+let pendingDiagnosticEntries = [];
 
 /* ---------------------------------------------------------------- *
  * Storage helpers                                                  *
@@ -397,38 +406,64 @@ async function recordMatchedRule(info) {
   }
 }
 
-async function recordDeceptionDiagnosticEntry(entry) {
+function recordDeceptionDiagnosticEntry(entry) {
+  if (!entry || typeof entry !== "object") return;
+  const type = String(entry.type || "");
+  const key = String(entry.key || "").slice(0, 120);
+  if (!type || !key) return;
+
+  pendingDiagnosticEntries.push({
+    type,
+    key,
+    host: String(entry.host || "").slice(0, 253),
+    at: Number.isFinite(entry.at) ? entry.at : Date.now()
+  });
+  // Cap the buffer so a hostile page can't grow it without bound between flushes.
+  if (pendingDiagnosticEntries.length > MAX_DECEPTION_RECENT_EVENTS * 4) {
+    pendingDiagnosticEntries = pendingDiagnosticEntries.slice(
+      -MAX_DECEPTION_RECENT_EVENTS * 4
+    );
+  }
+
+  if (!pendingDiagnosticsFlush) {
+    pendingDiagnosticsFlush = true;
+    setTimeout(flushDeceptionDiagnostics, 1500);
+  }
+}
+
+async function flushDeceptionDiagnostics() {
+  const batch = pendingDiagnosticEntries;
+  pendingDiagnosticEntries = [];
+  pendingDiagnosticsFlush = false;
+  if (!batch.length) return;
+
   try {
-    if (!entry || typeof entry !== "object") return;
-    const type = String(entry.type || "");
-    const key = String(entry.key || "").slice(0, 120);
-    if (!type || !key) return;
-
     const diagnostics = await getDeceptionDiagnostics();
-    if (type === "detectorHit") {
-      bumpRecord(diagnostics.detectorHits, key);
-    } else if (type === "patchReapply") {
-      diagnostics.patchReapplyEvents += 1;
-      bumpRecord(diagnostics.detectorHits, `patch-overwrite-${key}`);
-    } else if (type === "strictRuleHint") {
-      bumpRecord(diagnostics.strictRuleHints, key);
-    } else {
-      bumpRecord(diagnostics.detectorHits, `unknown-${type}`);
-    }
-
-    diagnostics.lastUpdated = new Date().toISOString();
-    diagnostics.recentEvents = [
-      ...(diagnostics.recentEvents || []),
-      {
-        type,
-        key,
-        host: String(entry.host || "").slice(0, 253),
-        at: Number.isFinite(entry.at) ? entry.at : Date.now()
+    for (const entry of batch) {
+      if (entry.type === "detectorHit") {
+        bumpRecord(diagnostics.detectorHits, entry.key);
+      } else if (entry.type === "patchReapply") {
+        diagnostics.patchReapplyEvents += 1;
+        bumpRecord(diagnostics.detectorHits, `patch-overwrite-${entry.key}`);
+      } else if (entry.type === "strictRuleHint") {
+        bumpRecord(diagnostics.strictRuleHints, entry.key);
+      } else {
+        bumpRecord(diagnostics.detectorHits, `unknown-${entry.type}`);
       }
-    ].slice(-MAX_DECEPTION_RECENT_EVENTS);
+      diagnostics.recentEvents.push({
+        type: entry.type,
+        key: entry.key,
+        host: entry.host,
+        at: entry.at
+      });
+    }
+    diagnostics.recentEvents = diagnostics.recentEvents.slice(
+      -MAX_DECEPTION_RECENT_EVENTS
+    );
+    diagnostics.lastUpdated = new Date().toISOString();
     await saveDeceptionDiagnostics(diagnostics);
   } catch (err) {
-    console.warn("[PrivacyShield] recordDeceptionDiagnostic failed", err);
+    console.warn("[PrivacyShield] flushDeceptionDiagnostics failed", err);
   }
 }
 
@@ -569,11 +604,25 @@ const messageHandlers = {
     if (!isValidDomain(domain)) return { ok: false, error: "Invalid host" };
     const current = await getSettings();
     const set = new Set(current.allowlist.map(normalizeDomain));
-    if (allowed) set.delete(domain);
-    else set.add(domain);
+    if (allowed) {
+      // Re-enable blocking: drop the exact host AND any parent-suffix entry that
+      // currently covers it (e.g. allowlisting example.com also matches
+      // www.example.com). Without this the popup toggle silently no-ops.
+      for (const entry of [...set]) {
+        if (domain === entry || domain.endsWith("." + entry)) set.delete(entry);
+      }
+    } else {
+      set.add(domain);
+    }
     if (set.size > MAX_ALLOWLIST) return { ok: false, error: "Allowlist limit reached" };
     const next = { ...current, allowlist: [...set] };
-    await saveSettings(next);
+    const saved = await saveSettings(next);
+    if (!saved) return { ok: false, error: "Storage failure" };
+    const sync = await syncDynamicRules(next);
+    if (!sync.ok) {
+      await saveSettings(current);
+      return { ok: false, error: sync.error || "Rule rejected by browser" };
+    }
     return { ok: true };
   },
 
@@ -586,7 +635,14 @@ const messageHandlers = {
       return { ok: false, error: "Allowlist limit reached" };
     }
     const next = { ...current, allowlist: [...current.allowlist, domain] };
-    await saveSettings(next);
+    const saved = await saveSettings(next);
+    if (!saved) return { ok: false, error: "Storage failure" };
+    // Verify DNR accepted the resulting rules; roll back if it rejected them.
+    const sync = await syncDynamicRules(next);
+    if (!sync.ok) {
+      await saveSettings(current);
+      return { ok: false, error: sync.error || "Rule rejected by browser" };
+    }
     return { ok: true };
   },
 
@@ -708,6 +764,8 @@ const messageHandlers = {
   },
 
   async resetDeceptionDiagnostics() {
+    pendingDiagnosticEntries = [];
+    pendingDiagnosticsFlush = false;
     await saveDeceptionDiagnostics(cloneDeceptionDiagnostics());
     return { ok: true };
   }

@@ -95,6 +95,10 @@
         <p class="card-help">
           Aggregate counts kept on this device only. Nothing is ever sent to a server.
         </p>
+        <p class="card-help card-note">
+          Note: live counters rely on a Chromium debug API that only reports for
+          unpacked / developer-mode installs. Blocking still works if these stay at zero.
+        </p>
         <ul id="stats-list" class="status-list">
           <li>Loading...</li>
         </ul>
@@ -109,6 +113,9 @@
         <ul id="diagnostics-list" class="status-list">
           <li>Loading...</li>
         </ul>
+        <h3 class="subhead">Recent events</h3>
+        <ul id="diagnostics-recent" class="entry-list" aria-label="Recent deception events"></ul>
+        <button type="button" id="btn-reset-diagnostics" class="link-button">Reset diagnostics</button>
       </section>
 
       <section class="card">

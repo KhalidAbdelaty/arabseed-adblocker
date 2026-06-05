@@ -29,13 +29,39 @@ The extension uses a warm editorial palette inspired by Anthropic-style design:
 cream backgrounds, charcoal text, burnt-orange accents, soft gradients, rounded
 cards, and a custom shield/play logo in `icons/arabseed-shield.svg`.
 
+## What's new in 1.1.0
+
+- Tracks ArabSeed's current official domains (`arabseed.show`, `arabseed.xyz`,
+  `arabseed.one`, `arabseed.net`, `arabseed.onl`, `arabseed.wiki`,
+  `arabseed.lol`, and more) in both targeting and the MAIN-world guard.
+- Blocks the new ad-redirect hosts (`interlinecustomroofingllc.com`,
+  `static.nresystems.com`) at the network layer and in the page guards, and
+  removes the new full-screen overlay/iframe ad layer (top `z-index` containers
+  and `--rdata` overlays).
+- The navigation guard is now signal-based: it blocks known ad hosts, dangerous
+  protocols, and obfuscated URLs instead of every external link, so legitimate
+  links and newly rotated mirrors keep working.
+- Popup "Block on this site" now correctly clears parent-domain allowlist
+  entries, and allowlist changes are verified against the browser with rollback
+  on failure.
+- Options page adds a diagnostics reset, a recent-events view, clearer
+  reload/import prompts, and a note that live counters need developer mode.
+- Toolbar icons are now PNG (`icons/icon16..128.png`), generated dependency-free
+  by `scripts/generate-icons.mjs`; `scripts/validate.mjs` checks the manifest and
+  DNR rule files before a release.
+
 ## Project structure
 
 ```
 extension/
   manifest.json              MV3 manifest, permissions, rule resources
+  package.json               Dev scripts only (icons, validate); no dependencies
   icons/
-    arabseed-shield.svg      Custom ArabSeed Shield logo/icon
+    arabseed-shield.svg      Source logo (used by popup/options HTML)
+    icon16/32/48/128.png     Rasterized toolbar/action icons (Chromium needs PNG)
+  scripts/
+    generate-icons.mjs       Dependency-free PNG icon generator
+    validate.mjs             Manifest + DNR rule validator
   target_config.js           Shared targeted-host and deception config
   service_worker.js          Background controller: settings, DNR rules, stats
   content_script.js          Lightweight cosmetic filtering (isolated world)
